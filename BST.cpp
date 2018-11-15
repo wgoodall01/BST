@@ -17,12 +17,13 @@
  */
 #include "bst.hpp"
 #include "doctest.hpp"
+#include <functional>
 #include <iostream>
 #include <queue>
 
 using namespace std;
 
-// Constructor, destructor, copy
+// ructor, destructor, copy
 BST::BST(int k) {
 	key = k;
 	left = right = nullptr;
@@ -39,17 +40,17 @@ BST::~BST() {
 	delete right;
 }
 
-BST::BST(const BST& other) {}
+BST::BST(BST& other) {}
 
 // private methods
-void BST::visit() const { cout << key << endl; }
+void BST::visit() { cout << key << endl; }
 
 /* Accessors */
-bool BST::isLeaf() const { return left == nullptr && right == nullptr; }
+bool BST::isLeaf() { return left == nullptr && right == nullptr; }
 
-BST* BST::getLeft() const { return left; }
+BST* BST::getLeft() { return left; }
 
-BST* BST::getRight() const { return right; }
+BST* BST::getRight() { return right; }
 
 BST* BST::find(int num) {
 	if (num == key)
@@ -76,29 +77,29 @@ BST* BST::min() {
 
 bool BST::contains(int num) { return find(num) != nullptr; }
 
-void BST::inOrder() const {
+void BST::inOrder(visitor_func visitor) {
 	if (left != nullptr)
-		left->inOrder();
-	visit();
+		left->inOrder(visitor);
+	visitor(this);
 	if (right != nullptr)
-		right->inOrder();
+		right->inOrder(visitor);
 }
-void BST::preOrder() const {
-	visit();
+void BST::preOrder(visitor_func visitor) {
+	visitor(this);
 	if (left != nullptr)
-		left->preOrder();
+		left->preOrder(visitor);
 	if (right != nullptr)
-		right->preOrder();
+		right->preOrder(visitor);
 }
-void BST::postOrder() const {
+void BST::postOrder(visitor_func visitor) {
 	if (left != nullptr)
-		left->postOrder();
+		left->postOrder(visitor);
 	if (right != nullptr)
-		right->postOrder();
-	visit();
+		right->postOrder(visitor);
+	visitor(this);
 }
 
-void BST::breadthFirst() {
+void BST::breadthFirst(visitor_func visitor) {
 	queue<BST*> nodes;
 	nodes.push(this);
 
@@ -106,7 +107,7 @@ void BST::breadthFirst() {
 		BST* node = nodes.front();
 		nodes.pop();
 
-		node->visit();
+		visitor(node);
 
 		if (node->left != nullptr) {
 			nodes.push(node->left);
@@ -163,6 +164,10 @@ BST* BST::remove(int val) {
 }
 
 TEST_CASE("bst doesn't explode") {
+	visitor_func printVisitor = [](BST* node) {
+		std::cout << node->key << std::endl;
+	};
+
 	BST* bst = new BST(5);
 	bst->add(1);
 	bst->add(2);
@@ -170,21 +175,21 @@ TEST_CASE("bst doesn't explode") {
 	bst->add(6);
 	bst->add(99999);
 
-	SUBCASE("in order traversal") { bst->inOrder(); }
+	SUBCASE("in order traversal") { bst->inOrder(printVisitor); }
 
-	SUBCASE("pre order traversal") { bst->preOrder(); }
+	SUBCASE("pre order traversal") { bst->preOrder(printVisitor); }
 
-	SUBCASE("post order traversal") { bst->postOrder(); }
+	SUBCASE("post order traversal") { bst->postOrder(printVisitor); }
 
 	SUBCASE("in order, without 5") {
 		cout << "in order, no5" << endl;
 		bst->remove(5);
-		bst->inOrder();
+		bst->inOrder(printVisitor);
 	}
 
 	SUBCASE("in order, without 6") {
 		cout << "in order, no6" << endl;
 		bst->remove(6);
-		bst->inOrder();
+		bst->inOrder(printVisitor);
 	}
 }

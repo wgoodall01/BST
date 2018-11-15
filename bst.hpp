@@ -12,7 +12,12 @@
  * .h file is only a header file.
  */
 
+#include <functional>
 #include <queue>
+
+class BST;
+
+typedef std::function<void(BST*)> visitor_func;
 
 class BST {
   private:
@@ -20,7 +25,7 @@ class BST {
 	BST* right;
 
 	/* some private helper functions */
-	void visit() const;
+	void visit();
 
   public:
 	int key;
@@ -28,22 +33,22 @@ class BST {
 	explicit BST(int k);
 	explicit BST(int k, BST* l, BST* r);
 	~BST();
-	BST(const BST& other);
+	BST(BST& other);
 
 	/* Accessors */
-	bool isLeaf() const;
-	BST* getLeft() const;
-	BST* getRight() const;
+	bool isLeaf();
+	BST* getLeft();
+	BST* getRight();
 
 	BST* find(int num);
 	BST* min();
 	bool contains(int num);
 
-	void inOrder() const;
-	void preOrder() const;
-	void postOrder() const;
+	void inOrder(visitor_func visitor);
+	void preOrder(visitor_func visitor);
+	void postOrder(visitor_func visitor);
 
-	void breadthFirst();
+	void breadthFirst(visitor_func visitor);
 
 	/* Mutators */
 	bool add(int num);
